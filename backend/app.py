@@ -6,8 +6,9 @@ def create_app(test_config=None):
     app = Flask(__name__)
     
     app.config.from_mapping(
-        SECRET_KEY='dev',
-        SQLALCHEMY_DATABASE_URI='mysql+pymysql://root:root@127.0.0.1:3306/ecommerce',
+        SECRET_KEY=os.getenv("SECRET_KEY"),
+
+SQLALCHEMY_DATABASE_URI=f"mysql+pymysql://{os.getenv('MYSQLUSER')}:{os.getenv('MYSQLPASSWORD')}@{os.getenv('MYSQLHOST')}:{os.getenv('MYSQLPORT')}/{os.getenv('MYSQLDATABASE')}",
         SQLALCHEMY_TRACK_MODIFICATIONS=False,
     )
 
@@ -22,7 +23,11 @@ def create_app(test_config=None):
         pass
 
     db.init_app(app)
-    cors.init_app(app, supports_credentials=True)
+    cors.init_app(
+    app,
+    supports_credentials=True,
+    origins=["https://shopping-website-pi-roan.vercel.app"]
+)
 
     with app.app_context():
         import models
@@ -32,6 +37,7 @@ def create_app(test_config=None):
 
     return app
 
+app = create_app()
+
 if __name__ == '__main__':
-    app = create_app()
     app.run(debug=True)
