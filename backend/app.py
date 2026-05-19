@@ -8,7 +8,7 @@ def create_app(test_config=None):
     app.config.from_mapping(
         SECRET_KEY=os.getenv("SECRET_KEY"),
 
-SQLALCHEMY_DATABASE_URI=f"mysql+pymysql://{os.getenv('MYSQLUSER')}:{os.getenv('MYSQLPASSWORD')}@{os.getenv('MYSQLHOST')}:{os.getenv('MYSQLPORT')}/{os.getenv('MYSQLDATABASE')}",
+SQLALCHEMY_DATABASE_URI=os.getenv("MYSQL_PUBLIC_URL"),
         SQLALCHEMY_TRACK_MODIFICATIONS=False,
     )
 
