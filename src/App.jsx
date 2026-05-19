@@ -144,20 +144,20 @@ async function seedIfNeeded() {}
 
 const Auth = {
   async signup(data) {
-    const res = await fetch("/api/auth/signup", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
+    const res = await fetch(import.meta.env.VITE_API_URL + "/api/auth/signup", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
     if (!res.ok) throw new Error((await res.json()).error || "Signup failed");
     return (await res.json()).user;
   },
   async login(data) {
-    const res = await fetch("/api/auth/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: data.identifier, password: data.password }) });
+    const res = await fetch(import.meta.env.VITE_API_URL + "/api/auth/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: data.identifier, password: data.password }) });
     if (!res.ok) throw new Error((await res.json()).error || "Login failed");
     return (await res.json()).user;
   },
   async logout() {
-    await fetch("/api/auth/logout", { method: "POST" });
+    await fetch(import.meta.env.VITE_API_URL + "/api/auth/logout", { method: "POST" });
   },
   async current() {
-    const res = await fetch("/api/auth/current");
+    const res = await fetch(import.meta.env.VITE_API_URL + "/api/auth/current");
     if (!res.ok) return null;
     return (await res.json()).user;
   },
@@ -171,40 +171,40 @@ const Auth = {
 
 const Cart = {
   async get(userId) {
-    const res = await fetch("/api/cart");
+    const res = await fetch(import.meta.env.VITE_API_URL + "/api/cart");
     if (!res.ok) return { items: [] };
     return { items: await res.json() };
   },
   async addItem(userId, productId, qty = 1) {
     for(let i=0; i<qty; i++) {
-        const res = await fetch("/api/cart", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ product_id: productId }) });
+        const res = await fetch(import.meta.env.VITE_API_URL + "/api/cart", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ product_id: productId }) });
         if (!res.ok) throw new Error((await res.json()).error || "Failed to add to cart");
     }
     return await Cart.get(userId);
   },
   async setQuantity(userId, productId, qty) {
-    const res = await fetch(`/api/cart/${productId}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ quantity: qty }) });
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/cart/${productId}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ quantity: qty }) });
     if (!res.ok) throw new Error((await res.json()).error || "Failed to update cart");
     return await Cart.get(userId);
   },
   async remove(userId, productId) {
-    await fetch(`/api/cart/${productId}`, { method: "DELETE" });
+    await fetch(`${import.meta.env.VITE_API_URL}/api/cart/${productId}`, { method: "DELETE" });
     return await Cart.get(userId);
   },
   async clear(userId) {
-    await fetch("/api/cart/clear", { method: "POST" });
+    await fetch(import.meta.env.VITE_API_URL + "/api/cart/clear", { method: "POST" });
   }
 };
 
 const Orders = {
   async place(userId, { shipping, paymentMethod }) {
-    const res = await fetch("/api/orders", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ shipping, paymentMethod }) });
+    const res = await fetch(import.meta.env.VITE_API_URL + "/api/orders", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ shipping, paymentMethod }) });
     if (!res.ok) throw new Error((await res.json()).error || "Failed to place order");
     const order = await res.json();
     return { order, items: order.items, payment: order.payment };
   },
   async listForUser(userId) {
-    const res = await fetch("/api/orders");
+    const res = await fetch(import.meta.env.VITE_API_URL + "/api/orders");
     if (!res.ok) return [];
     return await res.json();
   },
@@ -219,7 +219,7 @@ const Orders = {
 
 const Reviews = {
   async listForProduct(productId) {
-    const res = await fetch(`/api/reviews?product_id=${productId}`);
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/reviews?product_id=${productId}`);
     if (!res.ok) return [];
     return await res.json();
   },
@@ -229,7 +229,7 @@ const Reviews = {
   async upsert(userId, userName, productId, rating, comment) {
     if (rating < 1 || rating > 5) throw new Error("Rating must be 1–5.");
     if (!comment?.trim()) throw new Error("Please add a comment.");
-    await fetch("/api/reviews", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ product_id: productId, rating, comment: comment.trim() }) });
+    await fetch(import.meta.env.VITE_API_URL + "/api/reviews", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ product_id: productId, rating, comment: comment.trim() }) });
   },
   async delete(userId, productId) {
     // Not implemented
@@ -323,7 +323,7 @@ export default function App() {
 
   const refreshAll = useCallback(async () => {
     try {
-      const [catsRes, prodsRes] = await Promise.all([fetch("/api/categories"), fetch("/api/products")]);
+      const [catsRes, prodsRes] = await Promise.all([fetch(import.meta.env.VITE_API_URL + "/api/categories"), fetch(import.meta.env.VITE_API_URL + "/api/products")]);
       const cats = await catsRes.json();
       const prods = await prodsRes.json();
       setCategories(cats);
